@@ -1,12 +1,13 @@
 from flask import Flask, request
 from model import predict
+import tensorflow
 # create the flask object
 app = Flask(__name__)
 
 
 @app.route('/')
 def index():
-    return "Index Page"
+    return "Index Page" + tensorflow.keras.__version__
 
 
 @app.route('/prediction', methods=['GET', 'POST'])
