@@ -47,9 +47,9 @@ def predict(data):
         shutil.copyfileobj(r.raw, f)
 
     img = Image.open("raw_image.jpg")
-    img_array = np.array(img.resize((192, 160)))
+    width, height = img.size
 
-    background = Image.fromarray(img_array)
+    img_array = np.array(img.resize((192, 160)))
 
     array = []
     array.append(img_array)
@@ -58,14 +58,27 @@ def predict(data):
     X_f /= 255
     mask = model.predict(X_f, batch_size=4, verbose=0)
 
-    plt.figure(figsize=(5, 5))
-    plt.imshow(img_array)
-    plt.imshow(mask[0, :, :, 0], alpha=0.3)
-    plt.savefig('geeks.png')
+    mask = np.uint8(mask[0, :, :, 0] * 255)
 
-    #mask_image = Image.fromarray(mask[0,:,:,0]).convert('RGB')
-    #new_img = Image.blend(background, mask_image, 0.5)
-    #new_img.save("geeks.png")
+    img_mask = Image.fromarray(np.uint8(mask), 'L')
+    img_mask = img_mask.resize((width, height), Image.BICUBIC)
+    img_mask = np.array(img_mask)
+    img_mask[img_mask < 10] = 0
+    img_mask[img_mask >= 10] = 255
+    img_mask = Image.fromarray(np.uint8(img_mask), 'L')
+    img_mask = img_mask.convert("RGBA")
+
+    pixdata = img_mask.load()
+
+    width, height = img_mask.size
+    for y in range(height):
+        for x in range(width):
+            if pixdata[x, y] == (0, 0, 0, 255):
+                pixdata[x, y] = (0, 0, 0, 0)
+
+    # Overlay foreground onto background at top right corner, using transparency of foreground as mask
+    img.paste(img_mask, mask=img_mask)
+    img.save('geeks.png', 'PNG')
 
     with open("geeks.png", "rb") as file:
         url = "https://api.imgbb.com/1/upload"
