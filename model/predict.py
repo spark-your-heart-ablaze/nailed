@@ -56,7 +56,7 @@ def predict(data):
     img = Image.open("raw_image.jpg")
     width, height = img.size
 
-    img_array = np.array(img.resize((192, 160)))
+    img_array = np.array(img.resize((480, 400)))
 
     array = []
     array.append(img_array)
