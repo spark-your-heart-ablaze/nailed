@@ -20,4 +20,4 @@ urllib3==1.26.3
 Werkzeug==1.0.1
 gunicorn==19.0.0
 tensorflow-cpu==2.4.1
-opencv-python==4.5.1.48
+opencv-python==4.2.0.34
