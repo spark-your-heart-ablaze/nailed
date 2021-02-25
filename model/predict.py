@@ -8,6 +8,7 @@ from matplotlib import pyplot as plt
 import shutil  # to save it locally
 import cv2
 import glob
+import math
 
 
 
@@ -56,7 +57,7 @@ def predict(data):
     img = Image.open("raw_image.jpg")
     width, height = img.size
 
-    img_array = np.array(img.resize((480, 400)))
+    img_array = np.array(img.resize((192, 160)))
 
     array = []
     array.append(img_array)
@@ -112,36 +113,92 @@ def equip_template(template_path,raw_path,mask_image):
     template = Image.open(template_path)
 
     # Read color image
-    img = cv2.imread(raw_path)
+
     img_pil = Image.open(raw_path)
+    img_array = np.array(img_pil)
     # Read mask; OpenCV can't handle indexed images, so we need Pillow here
     # for that, see also: https://stackoverflow.com/q/59839709/11089932
     mask = np.array(Image.open(mask_image))
-    mask = mask.mean(axis=2)
     mask[mask < 254] = 0
     mask[mask > 0] = 1
 
-    binary_map = (mask > 0).astype(np.uint8)
+    mask = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
+    cnts, hierarchy = cv2.findContours(mask.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-    connectivity = 4 # or whatever you prefer
+    for c in cnts:
 
-    output = cv2.connectedComponentsWithStats(binary_map, connectivity, cv2.CV_32S)
+        ## create rotated rectangle
+        rect = cv2.minAreaRect(c)
+        h, w = np.int0(rect[1])
+        theta = np.int0(rect[2])
+        print(theta)
+        print(h,w)
+        w_b = w
+        h_b = h
 
-    mask = np.array(output[1]).astype('float32')
 
-    ## Iterate all colors in mask
-    for color in np.unique(mask):
-        if color == np.unique(mask)[-1]:
-            continue
-        # Color 0 is assumed to be background or artifacts
-        if color == 0:
-            continue
+        box = cv2.boxPoints(rect)
+        box = np.int0(box)
+        box = sorted(box, key=lambda k: [k[1], k[0]])
+        x, y = box[0]
 
-        # Determine bounding rectangle w.r.t. all pixels of the mask with
-        # the current color
-        x, y, w, h = cv2.boundingRect(np.uint8(mask == color))
+        #image = cv2.circle(img_array, (x,y), 10, color=(255, 255, 255), thickness=-10)
 
-        template_resized = template.resize((w, h), Image.BICUBIC)
-        img_pil.paste(template_resized, (x,y), mask=template_resized)
+        #cv2.imshow('image', image)
+        #cv2.waitKey(0)
+        #cv2.destroyAllWindows()
+
+        #theta = theta - 90
+        theta_photo = 0
+
+        if theta != 90:
+            theta_photo = theta
+            if theta > 45:
+                theta_photo = 90 - theta
+            length = w * math.cos(math.radians(90- abs(theta)))
+            x = x-length
+
+            length_2 = h * math.cos(math.radians(abs(theta)))
+            w_b = length + length_2
+
+            length = w * math.sin(math.radians(90 - abs(theta)))
+            length_2 = h * math.cos(math.radians(90 -abs(theta)))
+            h_b = length + length_2
+
+
+            # Start coordinate, here (100, 50)
+            # represents the top left corner of rectangle
+            start_point = (int(x), int(y))
+
+
+            # Ending coordinate, here (125, 80)
+            # represents the bottom right corner of rectangle
+            end_point = (int(x+w_b), int(y+h_b))
+
+            # Black color in BGR
+            color = (0, 0, 0)
+
+            # Line thickness of -1 px
+            # Thickness of -1 will fill the entire shape
+            thickness = 0
+
+            # Using cv2.rectangle() method
+            # Draw a rectangle of black color of thickness -1 px
+            #image = cv2.rectangle(img_array, start_point, end_point, color, thickness)
+            #cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+
+
+        if h<w:
+            theta_photo = -theta_photo
+
+
+
+        im1 = template.rotate(theta_photo, Image.NEAREST, expand=1)
+        #im1.show()
+
+        template_resized = im1.resize((int(w_b), int(h_b)), Image.BICUBIC)
+        img_pil.paste(template_resized, (int(x),int(y)), mask=template_resized)
+        #img_pil.show()
 
     return img_pil
