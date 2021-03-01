@@ -4,7 +4,6 @@ import numpy as np
 import urllib.request
 import base64
 import requests
-from matplotlib import pyplot as plt
 import shutil  # to save it locally
 import cv2
 import glob
