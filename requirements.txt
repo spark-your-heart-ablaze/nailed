@@ -5,4 +5,5 @@ Pillow==8.1.0
 gunicorn==19.0.0
 tensorflow-cpu==2.4.1
 opencv-python==4.2.0.34
-pixellib==0.5.6
+imantics==0.1.12
+scikit-image==0.17.2
