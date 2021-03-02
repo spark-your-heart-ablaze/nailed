@@ -1,4 +1,5 @@
 import tensorflow as tf
+from pixellib.instance import custom_segmentation
 from PIL import Image
 import numpy as np
 import urllib.request
@@ -8,22 +9,6 @@ import shutil  # to save it locally
 import cv2
 import glob
 import math
-
-
-
-def mean_iou(y_true, y_pred):
-    yt0 = y_true[:,:,:,0]
-    yp0 = K.cast(y_pred[:,:,:,0] > 0.5, 'float32')
-    inter = tf.count_nonzero(tf.logical_and(tf.equal(yt0, 1), tf.equal(yp0, 1)))
-    union = tf.count_nonzero(tf.add(yt0, yp0))
-    iou = tf.where(tf.equal(union, 0), 1., tf.cast(inter/union, 'float32'))
-    return iou
-
-dependencies = {
-     'mean_iou': mean_iou
-}
-
-model = tf.keras.models.load_model('model/nailed.h5', custom_objects=dependencies)
 
 
 def predict(data):
@@ -53,39 +38,7 @@ def predict(data):
     with open("raw_image.jpg", 'wb') as f:
         shutil.copyfileobj(r.raw, f)
 
-    img = Image.open("raw_image.jpg")
-    width, height = img.size
-
-    img_array = np.array(img.resize((192, 160)))
-
-    array = []
-    array.append(img_array)
-
-    X_f = np.array(array).astype('float32')
-    X_f /= 255
-    mask = model.predict(X_f, batch_size=4, verbose=0)
-
-    mask = np.uint8(mask[0, :, :, 0] * 255)
-
-    img_mask = Image.fromarray(np.uint8(mask), 'L')
-    img_mask = img_mask.resize((width, height), Image.BICUBIC)
-    img_mask = np.array(img_mask)
-    img_mask[img_mask < 10] = 0
-    img_mask[img_mask >= 10] = 255
-    img_mask = Image.fromarray(np.uint8(img_mask), 'L')
-    img_mask = img_mask.convert("RGBA")
-
-    pixdata = img_mask.load()
-
-    width, height = img_mask.size
-    for y in range(height):
-        for x in range(width):
-            if pixdata[x, y] == (0, 0, 0, 255):
-                pixdata[x, y] = (0, 0, 0, 0)
-
-    # Overlay foreground onto background at top right corner, using transparency of foreground as mask
-    #img.paste(img_mask, mask=img_mask)
-    img_mask.save('mask_image.png', 'PNG')
+    create_mask('raw_image.jpg')
 
     template_name = glob.glob('model/nail_templates/LUXIO_'+template_number+'*')[0]
     img_with_template = equip_template(template_name, 'raw_image.jpg', 'mask_image.png')
@@ -141,13 +94,6 @@ def equip_template(template_path,raw_path,mask_image):
         box = sorted(box, key=lambda k: [k[1], k[0]])
         x, y = box[0]
 
-        #image = cv2.circle(img_array, (x,y), 10, color=(255, 255, 255), thickness=-10)
-
-        #cv2.imshow('image', image)
-        #cv2.waitKey(0)
-        #cv2.destroyAllWindows()
-
-        #theta = theta - 90
         theta_photo = 0
 
         if theta != 90:
@@ -164,40 +110,42 @@ def equip_template(template_path,raw_path,mask_image):
             length_2 = h * math.cos(math.radians(90 -abs(theta)))
             h_b = length + length_2
 
-
-            # Start coordinate, here (100, 50)
-            # represents the top left corner of rectangle
-            start_point = (int(x), int(y))
-
-
-            # Ending coordinate, here (125, 80)
-            # represents the bottom right corner of rectangle
-            end_point = (int(x+w_b), int(y+h_b))
-
-            # Black color in BGR
-            color = (0, 0, 0)
-
-            # Line thickness of -1 px
-            # Thickness of -1 will fill the entire shape
-            thickness = 0
-
-            # Using cv2.rectangle() method
-            # Draw a rectangle of black color of thickness -1 px
-            #image = cv2.rectangle(img_array, start_point, end_point, color, thickness)
-            #cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
-
-
-
         if h<w:
             theta_photo = -theta_photo
 
-
-
         im1 = template.rotate(theta_photo, Image.NEAREST, expand=1)
-        #im1.show()
 
         template_resized = im1.resize((int(w_b), int(h_b)), Image.BICUBIC)
         img_pil.paste(template_resized, (int(x),int(y)), mask=template_resized)
-        #img_pil.show()
 
     return img_pil
+
+
+def create_mask(raw_image):
+    segment_image = custom_segmentation()
+    segment_image.inferConfig(num_classes= 1, class_names= ["BG", "nail"])
+    segment_image.load_model("model/mask_rcnn_model.084-0.348825.h5")
+    segmask, output = segment_image.segmentImage(raw_image)
+
+    img = Image.open(raw_image)
+    width, height = img.size
+
+    image = np.zeros((height, width), dtype=np.uint8)
+
+    for i in range(width):
+        for j in range(height):
+            if True in segmask['masks'][j][i]:
+                image[j][i] = 1
+
+    print(image)
+
+    img = Image.fromarray(np.uint8(image * 255) , 'L')
+    img = img.convert("RGB")
+
+    pixdata = img.load()
+
+    for y in range(height):
+        for x in range(width):
+            if pixdata[x, y] == (0, 0, 0, 255):
+                pixdata[x, y] = (0, 0, 0, 0)
+    img.save("mask_image.png", "PNG")
