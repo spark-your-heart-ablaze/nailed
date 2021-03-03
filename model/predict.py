@@ -5,7 +5,7 @@ import urllib.request
 import base64
 import requests
 import shutil  # to save it locally
-import cv2
+#import cv2
 import glob
 import math
 
