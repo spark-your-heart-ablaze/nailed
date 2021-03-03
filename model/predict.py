@@ -11,7 +11,7 @@ import math
 
 import numpy as np
 import os
-import cv2
+#import cv2
 import colorsys
 import random
 from imantics import Polygons, Mask
@@ -1886,11 +1886,11 @@ def predict(data):
     create_mask('raw_image.jpg')
 
     template_name = glob.glob('model/nail_templates/LUXIO_'+template_number+'*')[0]
-    img_with_template = equip_template(template_name, 'raw_image.jpg', 'mask_image.png')
-    img_with_template.save('geeks.png', 'PNG')
+    #img_with_template = equip_template(template_name, 'raw_image.jpg', 'mask_image.png')
+    #img_with_template.save('geeks.png', 'PNG')
 
 
-    with open("geeks.png", "rb") as file:
+    with open("mask_image.png", "rb") as file:
         url = "https://api.imgbb.com/1/upload"
         payload = {
             "key": '25502214673ff70e70aacc9157b3084e',
@@ -1905,65 +1905,65 @@ def predict(data):
     return res.json()['data']['url']
 
 
-def equip_template(template_path,raw_path,mask_image):
-    #Read template image
-    template = Image.open(template_path)
-
-    # Read color image
-
-    img_pil = Image.open(raw_path)
-    img_array = np.array(img_pil)
-    # Read mask; OpenCV can't handle indexed images, so we need Pillow here
-    # for that, see also: https://stackoverflow.com/q/59839709/11089932
-    mask = np.array(Image.open(mask_image))
-    mask[mask < 254] = 0
-    mask[mask > 0] = 1
-
-    mask = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
-    cnts, hierarchy = cv2.findContours(mask.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
-    for c in cnts:
-
-        ## create rotated rectangle
-        rect = cv2.minAreaRect(c)
-        h, w = np.int0(rect[1])
-        theta = np.int0(rect[2])
-        print(theta)
-        print(h,w)
-        w_b = w
-        h_b = h
-
-
-        box = cv2.boxPoints(rect)
-        box = np.int0(box)
-        box = sorted(box, key=lambda k: [k[1], k[0]])
-        x, y = box[0]
-
-        theta_photo = 0
-
-        if theta != 90:
-            theta_photo = theta
-            if theta > 45:
-                theta_photo = 90 - theta
-            length = w * math.cos(math.radians(90- abs(theta)))
-            x = x-length
-
-            length_2 = h * math.cos(math.radians(abs(theta)))
-            w_b = length + length_2
-
-            length = w * math.sin(math.radians(90 - abs(theta)))
-            length_2 = h * math.cos(math.radians(90 -abs(theta)))
-            h_b = length + length_2
-
-        if h<w:
-            theta_photo = -theta_photo
-
-        im1 = template.rotate(theta_photo, Image.NEAREST, expand=1)
-
-        template_resized = im1.resize((int(w_b), int(h_b)), Image.BICUBIC)
-        img_pil.paste(template_resized, (int(x),int(y)), mask=template_resized)
-
-    return img_pil
+#def equip_template(template_path,raw_path,mask_image):
+#    #Read template image
+#    template = Image.open(template_path)
+#
+#    # Read color image
+#
+#    img_pil = Image.open(raw_path)
+#    img_array = np.array(img_pil)
+#    # Read mask; OpenCV can't handle indexed images, so we need Pillow here
+#    # for that, see also: https://stackoverflow.com/q/59839709/11089932
+#    mask = np.array(Image.open(mask_image))
+#    mask[mask < 254] = 0
+#    mask[mask > 0] = 1
+#
+#    mask = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
+#    cnts, hierarchy = cv2.findContours(mask.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+#
+#    for c in cnts:
+#
+#        ## create rotated rectangle
+#        rect = cv2.minAreaRect(c)
+#        h, w = np.int0(rect[1])
+#        theta = np.int0(rect[2])
+#        print(theta)
+#        print(h,w)
+#        w_b = w
+#        h_b = h
+#
+#
+#        box = cv2.boxPoints(rect)
+#        box = np.int0(box)
+#        box = sorted(box, key=lambda k: [k[1], k[0]])
+#        x, y = box[0]
+#
+#        theta_photo = 0
+#
+#        if theta != 90:
+#            theta_photo = theta
+#            if theta > 45:
+#                theta_photo = 90 - theta
+#            length = w * math.cos(math.radians(90- abs(theta)))
+#            x = x-length
+#
+#            length_2 = h * math.cos(math.radians(abs(theta)))
+#            w_b = length + length_2
+#
+#            length = w * math.sin(math.radians(90 - abs(theta)))
+#            length_2 = h * math.cos(math.radians(90 -abs(theta)))
+#            h_b = length + length_2
+#
+#        if h<w:
+#            theta_photo = -theta_photo
+#
+#        im1 = template.rotate(theta_photo, Image.NEAREST, expand=1)
+#
+#        template_resized = im1.resize((int(w_b), int(h_b)), Image.BICUBIC)
+#        img_pil.paste(template_resized, (int(x),int(y)), mask=template_resized)
+#
+#    return img_pil
 
 
 def create_mask(raw_image):
