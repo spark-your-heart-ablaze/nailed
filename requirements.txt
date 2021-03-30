@@ -3,6 +3,8 @@ h5py==2.10.0
 numpy==1.19.5
 Pillow==8.1.0
 gunicorn==19.0.0
-tensorflow-cpu==2.4.1
+tensorflow==2.4.1
+opencv-python==4.2.0.34
 imantics==0.1.12
 scikit-image==0.17.2
+pixellib==0.5.6
