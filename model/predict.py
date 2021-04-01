@@ -113,7 +113,7 @@ def create_mask(raw_image):
 
             #make mask fully untransparent
             if pixdata[x, y][3] >10:
-                pixdata[x, y] = (pixdata[x, y][0], pixdata[x, y][1], pixdata[x, y][2], 255)
+                pixdata[x, y] = (pixdata[x, y][0], pixdata[x, y][1], pixdata[x, y][2], 0)
 
 
 

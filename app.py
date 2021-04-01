@@ -1,6 +1,6 @@
 from flask import Flask, request
 
-from model import predict, equip_color
+from model import predict, equip_color, equip_stamping
 #from model import equip
 
 import tensorflow
@@ -32,6 +32,17 @@ def equip():
     else:
         # model.predict.predict returns a dictionary
         prediction = equip_color.equip(name, template_number)
+    return str(prediction)
+
+@app.route('/equip_stamp', methods=['GET', 'POST'])
+def equip_stamp():
+    name = request.form.get('data')
+    stamping_name = request.form.get('stamping')
+    if name == None:
+        return 'Got None'
+    else:
+        # model.predict.predict returns a dictionary
+        prediction = equip_stamping.equip_template(name, stamping_name)
     return str(prediction)
 
 if __name__ == "__main__":
