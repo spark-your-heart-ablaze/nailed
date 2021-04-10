@@ -10,6 +10,8 @@ import math
 from pixellib.instance import custom_segmentation
 from scipy.interpolate import splprep, splev
 import os
+import cloudinary.uploader
+import requests
 
 
 class Segment_model(object):
@@ -86,10 +88,7 @@ class Segment_model(object):
 
         return img
 
-
-
-
-    def predict(self, data):
+    def predict(self, data, user_id, counter):
         ###  IMAGE PREPROCESSING  ###
         # |
         # |
@@ -97,20 +96,40 @@ class Segment_model(object):
         # |
         # |
         ###          END          ###
-        print(data)
+        # print(data)
+
         r = requests.get(data, stream=True)
         # Set decode_content value to True, otherwise the downloaded image file's size will be zero.
         r.raw.decode_content = True
         path_orig_photo = "model/orig/" + os.path.basename(data)
+        path_orig_photo_noextension = "model/orig/" + os.path.splitext(os.path.basename(data))[0]
         path_mask_photo = "model/mask/" + os.path.basename(data)
+
+        # 3print(path_orig_photo)
         # Open a local file with wb ( write binary ) permission.
         with open(path_orig_photo, 'wb') as f:
             shutil.copyfileobj(r.raw, f)
-
+        # importing the image
+        im = Image.open(path_orig_photo)
+        # converting to jpg
+        rgb_im = im.convert("RGB")
+        # exporting the image
+        rgb_im.save(path_orig_photo_noextension + '.jpg')
+        # os.remove(path_orig_photo)
+        path_orig_photo = path_orig_photo_noextension + '.jpg'
         img = self.segment_image.create_mask(path_orig_photo)
-
         img.save(path_mask_photo, "PNG")
-
+        # Cloudinary settings using python code. Run before pycloudinary is used.
+        import cloudinary
+        cloudinary.config(
+            cloud_name='dg0qyrbbh',
+            api_key='193157247241951',
+            api_secret='brazq0NfMbQDvVh_y56nb24oY_A'
+        )
+        result = cloudinary.uploader.upload(
+            path_orig_photo,
+            upload_preset="ml_default",
+            public_id=user_id + "_" + counter + "_" + os.path.splitext(os.path.basename(data))[0])
         # with open("geeks.png", "rb") as file:
         #    url = "https://api.imgbb.com/1/upload"
         #    payload = {
@@ -118,7 +137,6 @@ class Segment_model(object):
         #        "image": base64.b64encode(file.read()),
         #    }
         #    res = requests.post(url, payload)
-
         # You may want to further format the prediction to make it more
         # human readable
         return 1
