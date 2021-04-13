@@ -1,14 +1,19 @@
 from flask import Flask, request
 
 from model import equip_color, equip_stamping
-from model.predict import Segment_model
+from model.predict import predict
 # from model import equip
+from pixellib.instance import custom_segmentation
 
 import tensorflow
 
+
 # create the flask object
 app = Flask(__name__)
-model_ = Segment_model()
+
+segment_image = custom_segmentation()
+segment_image.inferConfig(num_classes=1, class_names=["BG", "nail"])
+segment_image.load_model("model/mask_rcnn_model.067-0.335795.h5")
 
 
 @app.route('/')
@@ -21,11 +26,12 @@ def prediction():
     data = request.form.get('data')
     user_id = request.form.get('user_id')
     counter = request.form.get('counter')
+    segment_image.load_model("model/mask_rcnn_model.067-0.335795.h5")
     if data == None:
         return 'Got None'
     else:
         # model.predict.predict returns a dictionary
-        prediction = model_.predict(data, user_id, counter)
+        prediction = predict(segment_image, data, user_id, counter)
     return str(prediction)
 
 
@@ -35,11 +41,13 @@ def equip():
     template_number = request.form.get('color')
     user_id = request.form.get('user_id')
     counter = request.form.get('counter')
+    stamping = request.form.get('stamping_condition')
+    color = request.form.get('color_condition')
     if name == None:
         return 'Got None'
     else:
         # model.predict.predict returns a dictionary
-        prediction = equip_color.equip(name, template_number, user_id, counter)
+        prediction = equip_color.equip(name, template_number, user_id, counter, stamping, color)
     return str(prediction)
 
 
@@ -47,11 +55,15 @@ def equip():
 def equip_stamp():
     name = request.form.get('data')
     stamping_name = request.form.get('stamping')
+    stamping = request.form.get('stamping_condition')
+    color = request.form.get('color_condition')
+    user_id = request.form.get('user_id')
+    counter = request.form.get('counter')
     if name == None:
         return 'Got None'
     else:
         # model.predict.predict returns a dictionary
-        prediction = equip_stamping.equip_template(name, stamping_name)
+        prediction = equip_stamping.equip_template(name, stamping_name, stamping, color, user_id, counter)
     return str(prediction)
 
 
