@@ -2,7 +2,7 @@ from PIL import Image
 import numpy as np
 import shutil  # to save it locally
 import cv2
-from pixellib.instance import custom_segmentation
+#from pixellib.instance import custom_segmentation
 from scipy.interpolate import splprep, splev
 import os
 import cloudinary.uploader

@@ -2,8 +2,9 @@ from flask import Flask, request
 
 from model import equip_color, equip_stamping
 from model.predict import predict
-# from model import equip
-from pixellib.instance import custom_segmentation
+from instance import custom_segmentation
+#from pixellib.instance import custom_segmentation
+from model import database
 
 import tensorflow
 
@@ -18,7 +19,7 @@ segment_image.load_model("model/mask_rcnn_model.067-0.335795.h5")
 
 @app.route('/')
 def index():
-    return "Index Page" + tensorflow.keras.__version__
+    return "Index Page туц" + tensorflow.keras.__version__
 
 
 @app.route('/prediction', methods=['GET', 'POST'])
@@ -26,9 +27,9 @@ def prediction():
     data = request.form.get('data')
     user_id = request.form.get('user_id')
     counter = request.form.get('counter')
-    segment_image.load_model("model/mask_rcnn_model.067-0.335795.h5")
+    #segment_image.load_model("model/mask_rcnn_model.067-0.335795.h5")
     if data == None:
-        return 'Got None'
+        return 'Got None туц'
     else:
         # model.predict.predict returns a dictionary
         prediction = predict(segment_image, data, user_id, counter)
@@ -66,6 +67,17 @@ def equip_stamp():
         prediction = equip_stamping.equip_template(name, stamping_name, stamping, color, user_id, counter)
     return str(prediction)
 
+@app.route('/download', methods=['GET', 'POST'])
+def download():
+    name = request.form.get('data')
+
+    if name == None:
+        return 'Got None'
+    else:
+        # model.predict.predict returns a dictionary
+        prediction = database.database(name)
+    return str(prediction)
+
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', debug=True)
+    app.run(host='0.0.0.0', debug=True, threaded=False)
