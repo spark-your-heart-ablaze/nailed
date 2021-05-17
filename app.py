@@ -115,6 +115,20 @@ def download(
         prediction = database.database(name)
     return str(prediction)
 
+@app.get('/add_to_csv', summary="Добавить строку в csv")
+def add_to_csv(
+        csv_parameter:str
+):
+    name = request.form.get('data')
+
+    if name == None:
+        return 'Got None'
+    else:
+        # model.predict.predict returns a dictionary
+        df = pd.DataFrame([csv_parameter])
+        df.to_csv('file.csv', mode='a', header=False)
+    return "success"
+
 
 #if __name__ == "__main__":
 #    app.run(host='0.0.0.0', debug=True, threaded=False)
