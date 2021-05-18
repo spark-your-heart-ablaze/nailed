@@ -14,4 +14,4 @@ def database(data):
     df = df.append(df1)
     result1 = df.to_json(orient="index")
     
-    return json.dumps(result1, indent=4)
+    return json.dumps(result1, indent=4, ensure_ascii=False).encode('utf8')
