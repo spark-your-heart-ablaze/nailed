@@ -40,11 +40,11 @@ segment_image = custom_segmentation()
 segment_image.inferConfig(num_classes=1, class_names=["BG", "nail"])
 segment_image.load_model("model/mask_rcnn_model.067-0.335795.h5")
 
-class mask_out(BaseModel):
-    mask_photo: str
+#class mask_out(BaseModel):
+#    mask_photo: str
 
 @app.post('/prediction', summary="Создание маски ногтей с фотографии, которую загрузил пользователь")
-async def prediction(Photo:str = Query(..., description='Оригинальное фото руки с уникальным нэймингом в формате base64')):
+async def prediction(Photo:str = Query(..., description='Оригинальное фото руки с уникальным нэймингом без точек и специальных символов прямой ссылкой')):
     data = Photo
     user_id = ''
     counter = ''
@@ -57,12 +57,12 @@ async def prediction(Photo:str = Query(..., description='Оригинально�
     return str(prediction)
 
 
-@app.get('/equip', summary="Получение маски нужного цвета", response_model=mask_out)
+@app.get('/equip', summary="Получение маски нужного цвета")
 async def equip(
-        photo_name: str,
-        stamping_condition: int,
-        color_condition: int,
-        color: str
+        photo_name: str = Query(..., description='Полное название фотографии, включая расширение.'),
+        stamping_condition: str = Query(..., description='Был ли уже использован стэмпинг? 0-нет, 1-да'),
+        color_condition: str = Query(..., description='Был ли уже использован цвет? 0-нет, 1-да'),
+        color: str = Query(..., description='Id цвета, полученный из базы данных')
 ):
     name = photo_name
     template_number = color
@@ -81,13 +81,12 @@ async def equip(
 @app.get(
     '/equip_stamp',
     summary="Получение фотографии с наложенным стэмпингом",
-    response_model=mask_out,
     response_description="Возвращает фото маски с нужным цветом в формате base64")
 def equip_stamp(
-        photo_name: str,
-        stamping_condition: int,
-        color_condition: int,
-        stamping: str
+        photo_name: str = Query(..., description='Полное название фотографии, включая расширение.'),
+        stamping_condition: str = Query(..., description='Был ли уже использован стэмпинг? 0-нет, 1-да'),
+        color_condition: str = Query(..., description='Был ли уже использован цвет? 0-нет, 1-да'),
+        stamping: str = Query(..., description='полное имя картинки, полученное из базы данных')
 ):
     name = photo_name
     stamping_name = stamping
@@ -104,9 +103,9 @@ def equip_stamp(
 
 @app.get('/download', summary="Получение всех цветов и стемпинга для выбранного салона")
 def download(
-        salon_code:int
+        salon_code: str = Query(..., description='Название салона, в который зашел пользователь')
 ):
-    name = request.form.get('data')
+    name = salon_code
 
     if name == None:
         return 'Got None'
@@ -115,11 +114,11 @@ def download(
         prediction = database.database(name)
     return str(prediction)
 
-@app.get('/add_to_csv', summary="Добавить строку в csv")
+@app.post('/add_to_csv', summary="Добавить строку в csv")
 def add_to_csv(
-        csv_parameter:str
+        csv_parameter: str = Query(..., description='Номер телефона пользователя')
 ):
-    name = request.form.get('data')
+    name = csv_parameter
 
     if name == None:
         return 'Got None'

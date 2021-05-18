@@ -39,30 +39,31 @@ def equip(name,template_number, user_id, counter, stamping, color):
         img_orig.paste(img, mask=img)
 
         # exporting the image
-        img_orig.save(user_id + '.jpg')
+        img_orig.save(name + '.jpg')
 
-        import cloudinary
-        cloudinary.config(
-            cloud_name='dg0qyrbbh',
-            api_key='193157247241951',
-            api_secret='brazq0NfMbQDvVh_y56nb24oY_A'
-        )
-        result = cloudinary.uploader.upload(
-            user_id + '.jpg',
-            upload_preset="ml_default", public_id= user_id + "_" + counter)
+        #import cloudinary
+        #cloudinary.config(
+        #    cloud_name='dg0qyrbbh',
+        #    api_key='193157247241951',
+        #    api_secret='brazq0NfMbQDvVh_y56nb24oY_A'
+        #)
+        #result = cloudinary.uploader.upload(
+        #    user_id + '.jpg',
+        #    upload_preset="ml_default", public_id= user_id + "_" + counter)
 
-        #with open("nail.png", "rb") as file:
-        #    url = "https://api.imgbb.com/1/upload"
-        #    payload = {
-        #        "key": '25502214673ff70e70aacc9157b3084e',
-        #        "image": base64.b64encode(file.read()),
-        #    }
-        #    res = requests.post(url, payload)
+        with open(name + '.jpg', "rb") as file:
+            url = "https://api.imgbb.com/1/upload"
+            payload = {
+                "key": '25502214673ff70e70aacc9157b3084e',
+                "image": base64.b64encode(file.read()),
+                "expiration": 86400,
+            }
+            res = requests.post(url, payload)
 
         # You may want to further format the prediction to make it more
         # human readable
-        #return res.json()['data']['url']
-        return 1
+        return res.json()['data']['url']
+        #return 1
 
     if stamping == '1' and (color == '1' or color == '0'):
         #template_number = int(template_number)
@@ -96,32 +97,33 @@ def equip(name,template_number, user_id, counter, stamping, color):
         img_orig.paste(img, mask=img)
         img_orig.paste(img_stamping, mask=img_stamping)
 
-        img_orig.save(user_id + '.jpg')
+        img_orig.save(name + '.jpg')
 
 
         print(user_id)
         print(counter)
         print(name)
-        import cloudinary
-        cloudinary.config(
-            cloud_name='dg0qyrbbh',
-            api_key='193157247241951',
-            api_secret='brazq0NfMbQDvVh_y56nb24oY_A'
-        )
-        result = cloudinary.uploader.upload(
-            user_id + '.jpg',
-            upload_preset="ml_default", public_id= user_id + "_" + counter)
+        #import cloudinary
+        #cloudinary.config(
+        #    cloud_name='dg0qyrbbh',
+        #    api_key='193157247241951',
+        #    api_secret='brazq0NfMbQDvVh_y56nb24oY_A'
+        #)
+        #result = cloudinary.uploader.upload(
+        #    user_id + '.jpg',
+        #    upload_preset="ml_default", public_id= user_id + "_" + counter)
 
-        #with open("nail.png", "rb") as file:
-        #    url = "https://api.imgbb.com/1/upload"
-        #    payload = {
-        #        "key": '25502214673ff70e70aacc9157b3084e',
-        #        "image": base64.b64encode(file.read()),
-        #    }
-        #    res = requests.post(url, payload)
+        with open(name + '.jpg', "rb") as file:
+            url = "https://api.imgbb.com/1/upload"
+            payload = {
+                "key": '25502214673ff70e70aacc9157b3084e',
+                "image": base64.b64encode(file.read()),
+                "expiration": 86400,
+            }
+            res = requests.post(url, payload)
 
         # You may want to further format the prediction to make it more
         # human readable
-        #return res.json()['data']['url']
-        return 1
+        return res.json()['data']['url']
+        #return 1
 

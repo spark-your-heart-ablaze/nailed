@@ -180,16 +180,16 @@ def predict(segment_image, data, user_id, counter):
     img = create_mask(segment_image, path_orig_photo)
     img.save(path_mask_photo, "PNG")
     # Cloudinary settings using python code. Run before pycloudinary is used.
-    import cloudinary
-    cloudinary.config(
-        cloud_name='dg0qyrbbh',
-        api_key='193157247241951',
-        api_secret='brazq0NfMbQDvVh_y56nb24oY_A'
-    )
-    result = cloudinary.uploader.upload(
-        path_orig_photo,
-        upload_preset="ml_default",
-        public_id=user_id + "_" + counter)
+    #import cloudinary
+    #cloudinary.config(
+    #    cloud_name='dg0qyrbbh',
+    #    api_key='193157247241951',
+    #    api_secret='brazq0NfMbQDvVh_y56nb24oY_A'
+    #)
+    #result = cloudinary.uploader.upload(
+    #    path_orig_photo,
+    #    upload_preset="ml_default",
+    #    public_id=user_id + "_" + counter)
     # with open("geeks.png", "rb") as file:
     #    url = "https://api.imgbb.com/1/upload"
     #    payload = {

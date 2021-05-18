@@ -161,28 +161,30 @@ def equip_template(raw_path,template_path, stamping, color,user_id, counter):
         mask.save("model/equiped_stamping/" + os.path.splitext(raw_path)[0] + ".png")
         img_pil.paste(mask,(0,0), mask=mask)
 
-        img_pil.save(user_id + '.jpg')
+        img_pil.save(raw_path + '.jpg')
 
-        import cloudinary
-        cloudinary.config(
-            cloud_name='dg0qyrbbh',
-            api_key='193157247241951',
-            api_secret='brazq0NfMbQDvVh_y56nb24oY_A'
-        )
-        result = cloudinary.uploader.upload(
-            user_id + '.jpg',
-            upload_preset="ml_default", public_id=user_id + "_" + counter)
-        #with open("nail.png", "rb") as file:
-        #    url = "https://api.imgbb.com/1/upload"
-        #    payload = {
-        #        "key": '25502214673ff70e70aacc9157b3084e',
-        #        "image": base64.b64encode(file.read()),
-        #    }
-        #    res = requests.post(url, payload)
+        #import cloudinary
+        #cloudinary.config(
+        #    cloud_name='dg0qyrbbh',
+        #    api_key='193157247241951',
+        #    api_secret='brazq0NfMbQDvVh_y56nb24oY_A'
+        #)
+        #result = cloudinary.uploader.upload(
+        #    user_id + '.jpg',
+        #    upload_preset="ml_default", public_id=user_id + "_" + counter)
+        with open(raw_path + '.jpg', "rb") as file:
+            url = "https://api.imgbb.com/1/upload"
+            payload = {
+                "key": '25502214673ff70e70aacc9157b3084e',
+                "image": base64.b64encode(file.read()),
+                "expiration": 86400,
+            }
+            res = requests.post(url, payload)
 #
         # You may want to further format the prediction to make it more
         # human readable
-        return 1
+        #return 1
+        return res.json()['data']['url']
 
     if (stamping == '0' or stamping == '1')  and color == '1':
         path_orig_photo = "model/orig/" + raw_path
@@ -339,27 +341,29 @@ def equip_template(raw_path,template_path, stamping, color,user_id, counter):
 
         img_pil.paste(mask,(0,0), mask=mask)
 
-        img_pil.save(user_id + '.jpg')
+        img_pil.save(raw_path + '.jpg')
 
-        import cloudinary
-        cloudinary.config(
-            cloud_name='dg0qyrbbh',
-            api_key='193157247241951',
-            api_secret='brazq0NfMbQDvVh_y56nb24oY_A'
-        )
-        result = cloudinary.uploader.upload(
-            user_id + '.jpg',
-            upload_preset="ml_default", public_id=user_id + "_" + counter)
+        #import cloudinary
+        #cloudinary.config(
+        #    cloud_name='dg0qyrbbh',
+        #    api_key='193157247241951',
+        #    api_secret='brazq0NfMbQDvVh_y56nb24oY_A'
+        #)
+        #result = cloudinary.uploader.upload(
+        #    user_id + '.jpg',
+        #    upload_preset="ml_default", public_id=user_id + "_" + counter)
 
-        #with open("nail.png", "rb") as file:
-        #    url = "https://api.imgbb.com/1/upload"
-        #    payload = {
-        #        "key": '25502214673ff70e70aacc9157b3084e',
-        #        "image": base64.b64encode(file.read()),
-        #    }
-        #    res = requests.post(url, payload)
+        with open(raw_path + '.jpg', "rb") as file:
+            url = "https://api.imgbb.com/1/upload"
+            payload = {
+                "key": '25502214673ff70e70aacc9157b3084e',
+                "image": base64.b64encode(file.read()),
+                "expiration": 86400,
+            }
+            res = requests.post(url, payload)
 
         # You may want to further format the prediction to make it more
         # human readable
-        return 1
+        #return 1
+        return res.json()['data']['url']
 
