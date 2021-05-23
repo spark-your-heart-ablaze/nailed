@@ -112,7 +112,7 @@ def download(
     else:
         # model.predict.predict returns a dictionary
         prediction = database.database(name)
-    return str(prediction)
+    return prediction
 
 @app.post('/add_to_csv', summary="Добавить строку в csv")
 def add_to_csv(

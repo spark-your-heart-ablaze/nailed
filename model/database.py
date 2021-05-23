@@ -13,6 +13,11 @@ def database(data):
     df1 = df1[df1["Код салона"].astype(str).str.contains(data)]
     df = df.append(df1)
     df.reset_index(inplace=True)
-    result1 = df.to_json(orient="index", force_ascii=False, indent=4)
+    df.fillna(value="none",inplace=True)
+    #result1 = df.to_json(orient="index", force_ascii=False, indent=4)
+    result1 = df.to_dict(orient="index")
+    print(type(result1))
 
-    return result1.replace('\/', r'/')
+
+    return result1
+
