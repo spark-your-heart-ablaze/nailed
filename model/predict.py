@@ -12,7 +12,7 @@ import tensorflow as tf
 import PIL.Image
 import PIL.ImageOps
 import numpy as np
-
+import base64
 
 def exif_transpose(img):
     if not img:
@@ -132,7 +132,7 @@ def create_mask(segment_image, raw_image):
 
     return img
 
-def predict(segment_image, data, user_id, counter):
+def predict(segment_image, data, user_id, counter, photo):
     ###  IMAGE PREPROCESSING  ###
     # |
     # |
@@ -142,9 +142,11 @@ def predict(segment_image, data, user_id, counter):
     ###          END          ###
     # print(data)
 
-    r = requests.get(data, stream=True)
+    #r = requests.get(data, stream=True)
     # Set decode_content value to True, otherwise the downloaded image file's size will be zero.
-    r.raw.decode_content = True
+    #r.raw.decode_content = True
+
+
     path_orig_photo = "model/orig/" + os.path.basename(data)
     path_orig_photo_noextension = "model/orig/" + os.path.splitext(os.path.basename(data))[0]
     path_mask_photo = "model/mask/" + os.path.splitext(os.path.basename(data))[0] + '.png'
@@ -152,7 +154,7 @@ def predict(segment_image, data, user_id, counter):
     # 3print(path_orig_photo)
     # Open a local file with wb ( write binary ) permission.
     with open(path_orig_photo, 'wb') as f:
-        shutil.copyfileobj(r.raw, f)
+        f.write(base64.b64decode(photo.split(',')[-1]))
     # importing the image
     im = Image.open(path_orig_photo)
 

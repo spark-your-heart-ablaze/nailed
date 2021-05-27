@@ -44,8 +44,11 @@ segment_image.load_model("model/mask_rcnn_model.067-0.335795.h5")
 #    mask_photo: str
 
 @app.post('/prediction', summary="Создание маски ногтей с фотографии, которую загрузил пользователь")
-async def prediction(Photo:str = Query(..., description='Оригинальное фото руки с уникальным нэймингом без точек и специальных символов прямой ссылкой')):
-    data = Photo
+async def prediction(
+        Photo: str = Query(..., description='Оригинальное фото руки с уникальным нэймингом без точек и специальных символов прямой ссылкой'),
+        name: str = Query(..., description='Название фотографии')):
+    photo = Photo
+    data = name
     user_id = ''
     counter = ''
     #segment_image.load_model("model/mask_rcnn_model.067-0.335795.h5")
@@ -53,7 +56,7 @@ async def prediction(Photo:str = Query(..., description='Оригинально�
         return 'Got None туц'
     else:
         # model.predict.predict returns a dictionary
-        prediction = predict(segment_image, data, user_id, counter)
+        prediction = predict(segment_image, data, user_id, counter,photo)
     return str(prediction)
 
 
