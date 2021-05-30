@@ -5,10 +5,11 @@ from model.predict import predict
 from instance import custom_segmentation
 #from pixellib.instance import custom_segmentation
 from model import database
+from io import BytesIO
 
 import tensorflow
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, File, UploadFile
 from fastapi import Query
 from fastapi.encoders import jsonable_encoder
 from starlette.middleware.cors import CORSMiddleware
@@ -43,11 +44,14 @@ segment_image.load_model("model/mask_rcnn_model.067-0.335795.h5")
 #class mask_out(BaseModel):
 #    mask_photo: str
 
+
+
 @app.post('/prediction', summary="Создание маски ногтей с фотографии, которую загрузил пользователь")
 async def prediction(
-        Photo: str = Query(..., description='Оригинальное фото руки с уникальным нэймингом без точек и специальных символов прямой ссылкой'),
+        Photo: UploadFile = File(..., description='Оригинальное фото руки с уникальным нэймингом без точек и специальных символов прямой ссылкой'),
         name: str = Query(..., description='Название фотографии')):
-    photo = Photo
+
+    photo = BytesIO(await Photo.read())
     data = name
     user_id = ''
     counter = ''
@@ -56,7 +60,7 @@ async def prediction(
         return 'Got None туц'
     else:
         # model.predict.predict returns a dictionary
-        prediction = predict(segment_image, data, user_id, counter,photo)
+        prediction = predict(segment_image, data, user_id, counter, photo)
     return str(prediction)
 
 

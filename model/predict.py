@@ -147,15 +147,15 @@ def predict(segment_image, data, user_id, counter, photo):
     #r.raw.decode_content = True
 
 
-    path_orig_photo = "model/orig/" + os.path.basename(data)
+    path_orig_photo = "model/orig/" + os.path.basename(data) + '.jpg'
     path_orig_photo_noextension = "model/orig/" + os.path.splitext(os.path.basename(data))[0]
     path_mask_photo = "model/mask/" + os.path.splitext(os.path.basename(data))[0] + '.png'
 
     # 3print(path_orig_photo)
     # Open a local file with wb ( write binary ) permission.
-    with open(path_orig_photo, 'wb') as f:
-        f.write(base64.b64decode(photo.split(',')[-1]))
-    # importing the image
+    im = Image.open(photo)
+    im.save(path_orig_photo)
+
     im = Image.open(path_orig_photo)
 
     if hasattr(PIL.ImageOps, 'exif_transpose'):
@@ -192,16 +192,16 @@ def predict(segment_image, data, user_id, counter, photo):
     #    path_orig_photo,
     #    upload_preset="ml_default",
     #    public_id=user_id + "_" + counter)
-    # with open("geeks.png", "rb") as file:
-    #    url = "https://api.imgbb.com/1/upload"
-    #    payload = {
-    #        "key": '25502214673ff70e70aacc9157b3084e',
-    #        "image": base64.b64encode(file.read()),
-    #    }
-    #    res = requests.post(url, payload)
+    with open(path_orig_photo, "rb") as file:
+        url = "https://api.imgbb.com/1/upload"
+        payload = {
+            "key": '25502214673ff70e70aacc9157b3084e',
+            "image": base64.b64encode(file.read()),
+        }
+        res = requests.post(url, payload)
     # You may want to further format the prediction to make it more
     # human readable
-    return 1
+    return res.json()['data']['url']
 
 
 
