@@ -154,9 +154,6 @@ def predict(segment_image, data, user_id, counter, photo):
     # 3print(path_orig_photo)
     # Open a local file with wb ( write binary ) permission.
     im = Image.open(photo)
-    im.save(path_orig_photo)
-
-    im = Image.open(path_orig_photo)
 
     if hasattr(PIL.ImageOps, 'exif_transpose'):
         # Very recent versions of PIL can do exit transpose internally
