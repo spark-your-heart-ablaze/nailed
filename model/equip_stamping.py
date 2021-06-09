@@ -15,7 +15,7 @@ import os
 
 def equip_template(raw_path,template_path, stamping, color,user_id, counter):
     if (stamping == '0' or stamping == '1') and color == '0':
-        path_orig_photo = "model/orig/" + raw_path
+        path_orig_photo = "model/orig/" + os.path.splitext(os.path.basename(raw_path))[0] + '.jpg'
         path_mask_photo = "model/mask/" + os.path.splitext(raw_path)[0] + ".png"
         template_path = "model/stamping/" + template_path
 
@@ -23,6 +23,7 @@ def equip_template(raw_path,template_path, stamping, color,user_id, counter):
         template = Image.open(template_path)
 
         # Read color image
+
 
         img_pil = Image.open(path_orig_photo)
         img_array = np.array(img_pil)
@@ -187,7 +188,7 @@ def equip_template(raw_path,template_path, stamping, color,user_id, counter):
         return res.json()['data']['url']
 
     if (stamping == '0' or stamping == '1')  and color == '1':
-        path_orig_photo = "model/orig/" + raw_path
+        path_orig_photo = "model/orig/" + os.path.splitext(os.path.basename(raw_path))[0] + '.jpg'
         path_mask_photo = "model/mask/" + os.path.splitext(raw_path)[0] + ".png"
         template_path = "model/stamping/" + template_path
         color_path = "model/equiped_color/" + os.path.splitext(raw_path)[0] + ".png"

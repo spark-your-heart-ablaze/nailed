@@ -19,7 +19,7 @@ from typing import Optional
 import re
 import pandas as pd
 import uvicorn
-
+import os
 
 #Main app
 app = FastAPI(
@@ -89,14 +89,14 @@ async def equip(
     '/equip_stamp',
     summary="Получение фотографии с наложенным стэмпингом",
     response_description="Возвращает фото маски с нужным цветом в формате base64")
-def equip_stamp(
+async def equip_stamp(
         photo_name: str = Query(..., description='Полное название фотографии, включая расширение.'),
         stamping_condition: str = Query(..., description='Был ли уже использован стэмпинг? 0-нет, 1-да'),
         color_condition: str = Query(..., description='Был ли уже использован цвет? 0-нет, 1-да'),
         stamping: str = Query(..., description='полное имя картинки, полученное из базы данных')
 ):
     name = photo_name
-    stamping_name = stamping
+    stamping_name = os.path.basename(stamping).replace('\'', '')
     stamping = stamping_condition
     color = color_condition
     user_id = ''
@@ -109,7 +109,7 @@ def equip_stamp(
     return str(prediction)
 
 @app.get('/download', summary="Получение всех цветов и стемпинга для выбранного салона")
-def download(
+async def download(
         salon_code: str = Query(..., description='Название салона, в который зашел пользователь')
 ):
     name = salon_code
@@ -122,7 +122,7 @@ def download(
     return prediction
 
 @app.post('/add_to_csv', summary="Добавить строку в csv")
-def add_to_csv(
+async def add_to_csv(
         csv_parameter: str = Query(..., description='Номер телефона пользователя')
 ):
     name = csv_parameter
